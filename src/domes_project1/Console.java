@@ -10,6 +10,10 @@ public class Console {
 		String filename = in.nextLine();
 		A_tropos file_a = new A_tropos();
 		file_a.createFile(filename, 10000, 1000000);
+		file_a.readFileForTestingPurposes(filename);
+		System.out.println("Enter key to search for: ");
+		int des_key = in.nextInt();
+		file_a.serialSearch(filename, des_key);
 		in.close();
 		return;
 	}
