@@ -2,6 +2,7 @@ package domes_project1;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class A_tropos {
@@ -68,13 +69,11 @@ public class A_tropos {
 		
 		for(int i=0; i<blocks; i++) {
 			sys.ReadBlock(i);
-			//System.out.println("Keys in block " + i + ": ");
+			System.out.println("Keys in block " + i + ": ");
 
 			for(int j=0; j<4; j++) {
 				keys[j] = Functions_misc.readInt(sys.buffer, j*record_size);
-				if(i==0) {
-					System.out.println(keys[j]);
-				}
+				System.out.println(keys[j]);
 			}
 		}
 		
@@ -101,4 +100,53 @@ public class A_tropos {
 		System.out.println("The key was not found after the whole file was scanned (" + disk_accesses + " disk accesses).");
 		return 0;
 	}
+
+	public void createSortedFile_A(String filename) throws IOException {
+		FileManager src_sys = new FileManager();
+		FileManager dst_sys = new FileManager();
+		// TODO make it write to blocks [1:] so block 0 is reserved for FileHandle info, and add FileHandle info before exiting
+ 
+		String sorted_filename = filename + "_sorted";
+		dst_sys.CreateFile(sorted_filename);
+		dst_sys.OpenFile(sorted_filename);
+		src_sys.OpenFile(filename);
+		
+		ArrayList<Integer> unsortedkeys = new ArrayList<Integer>();
+		ArrayList<Record> records = new ArrayList<Record>();
+		
+		int filesize = (int) src_sys.file.length();
+		int blocks = filesize/DataPageSize;
+		int key, counter = 0, block_num=0;
+		byte[] data = new byte[record_size-4];
+		
+		for(int i=0; i<blocks; i++) {
+			src_sys.ReadBlock(i);
+			for(int j=0; j<4; j++) {
+				key = Functions_misc.readInt(src_sys.buffer, j*record_size);
+				unsortedkeys.add(key);
+				data = Arrays.copyOfRange(src_sys.buffer, j*record_size+4, (j+1)*record_size);
+				Record rec = new Record(key, data);
+				records.add(rec);
+			}
+		}
+		
+		ArrayList<Record> sorted_recs = Functions_misc.sortRecords(records);
+		
+		for(int i=0; i<sorted_recs.size(); i++) {
+			data = sorted_recs.get(i).getData();
+			key = sorted_recs.get(i).getKey();
+			dst_sys.writeIntToBuffer(key, record_size*counter);
+	    	System.arraycopy(data, 0, dst_sys.buffer, record_size*counter+4, data.length);
+	    	
+	    	if(counter==3) {
+		    	dst_sys.WriteBlock(block_num);
+	    		block_num++;
+		    	counter=0;
+	    	}else {
+	    		counter++;
+	    	}		
+	    }
+		
+	}
+	
 }

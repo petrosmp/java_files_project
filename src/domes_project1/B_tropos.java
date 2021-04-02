@@ -7,7 +7,7 @@ import java.util.Random;
 
 @SuppressWarnings("unused")
 public class B_tropos {
-	
+	// TODO add close() function
 	int record_size = 32;
 	FileManager sys_ptrs;
 	FileManager sys_recs;
@@ -181,4 +181,6 @@ public class B_tropos {
 		System.out.println("The key was not found in the expected block. That shouldnt happen. Please check the file.");
 		return;
 	}
+
+
 }

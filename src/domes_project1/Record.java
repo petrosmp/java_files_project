@@ -7,6 +7,11 @@ public class Record {
 	public int key;
 	public byte[] data;
 	
+	Record(int key, byte[] data){
+		this.key = key;
+		this.data = data;
+	}
+	
 	public int getKey() {
 		return key;
 	}
