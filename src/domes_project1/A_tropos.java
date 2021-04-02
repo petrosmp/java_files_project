@@ -130,7 +130,7 @@ public class A_tropos {
 			}
 		}
 		
-		ArrayList<Record> sorted_recs = Functions_misc.sortRecords(records);
+		ArrayList<Record> sorted_recs = Functions_misc.sortRecordsA(records);
 		
 		for(int i=0; i<sorted_recs.size(); i++) {
 			data = sorted_recs.get(i).getData();
@@ -138,7 +138,7 @@ public class A_tropos {
 			dst_sys.writeIntToBuffer(key, record_size*counter);
 	    	System.arraycopy(data, 0, dst_sys.buffer, record_size*counter+4, data.length);
 	    	
-	    	if(counter==3) {
+	    	if(counter==(DataPageSize/record_size)-1) {
 		    	dst_sys.WriteBlock(block_num);
 	    		block_num++;
 		    	counter=0;
