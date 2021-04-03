@@ -17,7 +17,7 @@ public class A_tropos {
 	
 	public void createFile(String filename, int numOfRecords, int maxKey) throws IOException {
 		// TODO make it write to blocks [1:] so block 0 is reserved for FileHandle info, and add FileHandle info before exiting
-		sys.CreateFile(filename);
+		//sys.CreateFile(filename);
 		sys.OpenFile(filename);
 		
 		// initialize variables
@@ -42,7 +42,7 @@ public class A_tropos {
 			
 	    	// write the key
 	    	used_keys.add(random);
-	    	System.out.println(random + " is key #" + i);
+	    	//System.out.println(random + " is key #" + i);
 	    	sys.writeIntToBuffer(random, record_size*counter);
 	    	
 	    	// write the data
@@ -124,7 +124,7 @@ public class A_tropos {
 		FileManager src_sys = new FileManager();
 		FileManager dst_sys = new FileManager();
 		String sorted_filename = filename + "_sorted";
-		dst_sys.CreateFile(sorted_filename);
+		//dst_sys.CreateFile(sorted_filename);
 		dst_sys.OpenFile(sorted_filename);
 		src_sys.OpenFile(filename);
 		ArrayList<Record> records = new ArrayList<Record>();
@@ -138,7 +138,7 @@ public class A_tropos {
 		//  for simplicity and timing reasons)
 		for(int i=0; i<blocks; i++) {				// iterate over the blocks
 			src_sys.ReadBlock(i);					// read a single block
-			disk_reads++;						// increment the disk access counter
+			disk_reads++;							// increment the disk access counter
 			for(int j=0; j<4; j++) {				// iterate over the records in the block
 				key = Functions_misc.readInt(src_sys.buffer, j*record_size);
 				data = Arrays.copyOfRange(src_sys.buffer, j*record_size+4, (j+1)*record_size);

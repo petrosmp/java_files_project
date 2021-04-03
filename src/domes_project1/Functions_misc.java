@@ -136,10 +136,11 @@ public class Functions_misc {
 		sys.OpenFile(filename);
 		int recs_per_block = DataPageSize/rec_size;
 		// verbose things for debbuging TODO remove
-		System.out.println("\nbinarySearch called with:");
-		System.out.println("Left index is block " + left_index);
-		System.out.println("Right index is block " + right_index);
-		System.out.println("Disk accesses: " + disk_accesses);
+			//System.out.println("\nbinarySearch called with:");
+			//System.out.println("Left index is block " + left_index);
+			//System.out.println("Right index is block " + right_index);
+			//System.out.println("Disk accesses: " + disk_accesses);
+		
 		// binarySearch implementation based off the org.tuc.binarysearcharray.recursive package, binarySearch class (also included in this project)
 		// Necessary modifications were made so that the algorithm searches for the correct block in a binary fashion
 		// and then searches that block for the key in a binary fashion
@@ -149,8 +150,8 @@ public class Functions_misc {
             sys.ReadBlock(mid_block);										// read the middle block
     		disk_accesses++;												// increment the disk access counter
     		// verbose things for debugging TODO remove
-    		System.out.println("Smallest key in block " + mid_block + ": " + readInt(sys.buffer, 0));
-    		System.out.println("Largest key in block " + mid_block + ": " + readInt(sys.buffer, (recs_per_block-1)*rec_size));
+    			//System.out.println("Smallest key in block " + mid_block + ": " + readInt(sys.buffer, 0));
+    			//System.out.println("Largest key in block " + mid_block + ": " + readInt(sys.buffer, (recs_per_block-1)*rec_size));
     		
     		// since the block is also sorted, the smallest key in it is the first one. That means that if the desired_key is smaller than that, we need to search the left sub-file
     		if(desired_key<readInt(sys.buffer, 0)) {						// check if the desired key is smaller than the smallest key in the block
@@ -198,12 +199,12 @@ public class Functions_misc {
         }
 		// the program reaches here when the binarySearch that searches for the right block doesn't find a block that could contain the key
 		// that means that the key is somewhere between the largest value of the left block and the smaller value of the right one
-		System.out.println("Left index is the same or more than the right index");
-		System.out.println("This means that the desired key wasn't found, but in a special way");
-		System.out.println("The key was between the greatest value of one block and the smallest value of the next!");
-		System.out.println("Left index is block " + left_index);
-		System.out.println("Right index is block " + right_index);
-		System.out.println("Disk accesses: " + disk_accesses);
+			//System.out.println("Left index is the same or more than the right index");
+			//System.out.println("This means that the desired key wasn't found, but in a special way");
+			System.out.println("The key was between the greatest value of one block and the smallest value of the next!");
+			//System.out.println("Left index is block " + left_index);
+			//System.out.println("Right index is block " + right_index);
+			System.out.println("Disk accesses: " + disk_accesses);
 		return;
 		
 	}

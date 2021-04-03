@@ -181,7 +181,7 @@ public class B_tropos {
 		}
 		
 		if(block==-1) {				// the block variable is initialized to -1 (see line 142) and if it hasn't changed until here, the key wasn't found (
-			System.out.println("The desired key (" + desired_key +") was not found in the pointers file.");
+			System.out.println("The desired key (" + desired_key +") was not found in the pointers file after " + disk_accesses + " disk accesses.");
 			return;					// if the key wasn't found in the pointers file, we have no reason to go through the records one
 		}
 		
