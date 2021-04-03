@@ -11,6 +11,7 @@ public class FileManager {
 	
 	
 	public int FileHandle(String filename) throws IOException {
+		// TODO clear and fix
 		this.OpenFile(filename);
 		if(file == null) {
 			System.out.println("File is null! Error occured in FileHandle()");
@@ -35,7 +36,7 @@ public class FileManager {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream() ;
     	DataOutputStream dos = new DataOutputStream(bos);
 
-		///////
+		/////// TODO fix
 		
 		// put the bytes of filename in a byte array of size max_filename_size and put them in the buffer
 		byte[] bfilename = filename.getBytes();
@@ -70,11 +71,13 @@ public class FileManager {
 	
 	public int OpenFile(String filename) throws IOException {
 		try{
+			// open the file and initialize the buffer
 			file = new RandomAccessFile(filename, "rw");
+			this.buffer = null;
 		}
-		catch (FileNotFoundException e){
-			//TODO 
-			System.out.println("kys");
+		catch (Exception e){
+			System.out.println("Error occured in OpenFile(" + filename + ").");
+			e.printStackTrace();
 			return -1;
 		}
 		return (int) (file.length()/128);
@@ -93,15 +96,17 @@ public class FileManager {
 			return 0;
 		}
 		// if none of the above are true, do the following
-		byte[] ReadDataPage = new byte[DataPageSize];
-        file.seek(offset);
-        file.read(ReadDataPage);
-        ByteArrayInputStream bis = new ByteArrayInputStream(ReadDataPage);
-        DataInputStream din = new DataInputStream(bis);
+		byte[] ReadDataPage = new byte[DataPageSize];						// initialize a block sized byte array
+        file.seek(offset);													// move the cursor to the block we want to read
+        file.read(ReadDataPage);											// read the block and save it in the array
+        ByteArrayInputStream bis = new ByteArrayInputStream(ReadDataPage);	// initialize the byteArrayInputStream
+        DataInputStream din = new DataInputStream(bis);						// initialize the DataInputStream (which we basically use to "decode" the bytes into primitive types)
         byte[] readBuf = new byte[DataPageSize];
         try {
+        	// save the block to a buffer
         	din.read(readBuf, 0, DataPageSize);
         }catch(IndexOutOfBoundsException e) {
+        	// if an index error occurs "announce" it and exit
         	System.out.println("File is not properly formated. Last page is less than 128 bytes, couldn't be parsed.");
         	System.out.println("Error occured in readBlock(" + pos + ")");
         	return 0;
@@ -122,6 +127,7 @@ public class FileManager {
 			System.out.println("The file does not have a " + nextBlockPos + " page! (error occured in ReadNextBlock)");
 			return 0;
 		}
+		// read the next block
 		this.ReadBlock(nextBlockPos);
 		return 0;
 	}
@@ -135,24 +141,25 @@ public class FileManager {
 		}
 		// check if buffer has things in it
 		if(buffer == null) {
-			System.out.println("The buffer is empty (error occured in WriteBlock)");
+			System.out.println("The buffer is empty (error occured in WriteBlock). Nothing will be written to the file");
 			return 0;
 		}
 		// if file is bigger than offset, maybe call append block (?) which probably calls write block too though idk TODO
-		
+		// initialize variables and streams
 		int offset = pos*DataPageSize;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream() ;
     	DataOutputStream out = new DataOutputStream(bos);
     	// TODO edit
     	byte[] writeBuffer = new byte[DataPageSize];
     	byte[] writeBuffer1 = new byte[DataPageSize];
-    	out.write(buffer);
+    	out.write(buffer);									// write buffer to the output stream
     	
     	
-    	writeBuffer1 = bos.toByteArray();
-    	System.arraycopy(writeBuffer1, 0, writeBuffer, 0, writeBuffer1.length);
-    	file.seek(offset);
-    	file.write(this.buffer);
+    	writeBuffer1 = bos.toByteArray();					// get the contents of the stream in a byte array
+    	System.arraycopy(writeBuffer1, 0, writeBuffer, 0, writeBuffer1.length);		// copy the above byte array in a block sized one (so that only blocks are written to the file)
+    	file.seek(offset);									// move cursor to the appropriate block
+    	file.write(this.buffer);							// write the bytes to the file
+    	// flush and close the streams // TODO IN OTHER FUNCTIONS TOO
     	out.flush();
     	out.close();
     	bos.flush();
@@ -162,8 +169,6 @@ public class FileManager {
 	}
 	
 	public int WriteNextBlock(int pos) throws IOException {
-		
-		// check if file is null (might not be necessary because WriteBlock() does that)
 		int nextBlockPosition = pos+1;
 		this.WriteBlock(nextBlockPosition);
 		return 0;
@@ -176,7 +181,7 @@ public class FileManager {
 			System.out.println("The file is null (error occured in AppendBlock)");
 			return 0;
 		}
-		// add check if filesize isnt a product of DataPageSize, and fix it
+		// add check if filesize isnt a product of DataPageSize, and fix it TODO
 
 		int fileSize = (int) file.length();
 		fileSize+=DataPageSize;
@@ -270,7 +275,7 @@ public class FileManager {
 		*/
 		if(this.buffer == null) {
 			this.buffer = new byte[DataPageSize];
-			System.out.println("Buffer initialized in writeIntToBuffer().");
+			//System.out.println("Buffer initialized in writeIntToBuffer().");
 		}
 		Functions_misc.writeInt(this.buffer, offset, i);
 		return 0;

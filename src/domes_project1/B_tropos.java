@@ -2,11 +2,9 @@ package domes_project1;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 
-@SuppressWarnings("unused")
 public class B_tropos {
 	// TODO add close() function
 	int record_size = 32;
@@ -51,7 +49,7 @@ public class B_tropos {
 			
 	    	// add the key to the used_keys array, write it to the file
 	    	used_keys.add(random);
-	    	System.out.println(random + " is key #" + i);		// testing purposes
+	    	//System.out.println(random + " is key #" + i);		// testing purposes
 	    	sys_recs.writeIntToBuffer(random, record_size*recs_counter);
 	    	
 	    	// get random binary data and write it to the file
@@ -86,6 +84,7 @@ public class B_tropos {
 		System.out.println("File " + filename + " created with " + total_da + " disk accesses. (" + ptrs_block_num + " for the pointers file and " + rec_block_num + " for the records file)");
 	}
 
+	@SuppressWarnings("unused") // TODO remove this AND the function
 	public void readFilesForTestingPuproses(String filename) throws IOException {
 		
 		String recs_name = filename + "_recs";			// records filename
@@ -105,12 +104,10 @@ public class B_tropos {
 		
 		for(int i=0; i<recs_blocks; i++) {
 			sys_recs.ReadBlock(i);
-			if(i==1337) {
-				System.out.println("Keys found in block " + i);
-				for(int j=0; j<4; j++) {
-					keys[j] = Functions_misc.readInt(sys_recs.buffer, j*record_size);
-					System.out.println(keys[j]);
-				}
+			//System.out.println("Keys found in block " + i);
+			for(int j=0; j<4; j++) {
+				keys[j] = Functions_misc.readInt(sys_recs.buffer, j*record_size);
+				//System.out.println(keys[j]);
 			}
 		}
 		for(int i=0; i<ptrs_blocks; i++) {
@@ -118,28 +115,23 @@ public class B_tropos {
 			for(int j=0; j<DataPageSize/8; j++) {
 				if(i>620) {
 					test = Functions_misc.readInt(sys_ptrs.buffer, j*8);
-					System.out.print("Key: " + test + " ");
+					//System.out.print("Key: " + test + " ");
 					test = Functions_misc.readInt(sys_ptrs.buffer, (j*8)+4);
-					System.out.print("Block: " + test + "\n");
+					//System.out.print("Block: " + test + "\n");
 				}
 			}
 		}
 		
 	}
 	
+	@SuppressWarnings("unused") // TODO remove this AND the function
 	public void readSortedFileForTestingPuproses(String filename) throws IOException {
 		
 		String ptrs_name = filename + "_ptrs_sorted";			// pointers filename
 		
 		// open files
 		sys_ptrs.OpenFile(ptrs_name);
-		System.out.println("Opened file: " + ptrs_name);
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		// initialize variables
 		int ptrs_filesize = (int) sys_ptrs.file.length();
 		int test;
@@ -147,14 +139,15 @@ public class B_tropos {
 		
 		for(int i=0; i<ptrs_blocks; i++) {
 			sys_ptrs.ReadBlock(i);
+			
+			//System.out.println("Keys found in block " + i);
 			for(int j=0; j<DataPageSize/8; j++) {
 				test = Functions_misc.readInt(sys_ptrs.buffer, j*8);
-				System.out.print("Key: " + test + " ");
+				//System.out.print("Key: " + test + " ");
 				test = Functions_misc.readInt(sys_ptrs.buffer, (j*8)+4);
-				System.out.print("Block: " + test + "\n");
+				//System.out.print("Block: " + test + "\n");
 			}
 		}
-		
 	}
 
 	public void serialSearch(String filename, int desired_key) throws IOException {
@@ -167,11 +160,8 @@ public class B_tropos {
 		sys_ptrs.OpenFile(ptrs_name);
 		
 		// initialize variables
-		int recs_filesize = (int) sys_recs.file.length();
 		int ptrs_filesize = (int) sys_ptrs.file.length();
-		int[] keys = {0, 0, 0, 0};
 		int key, block=-1, disk_accesses=0;
-		int recs_blocks = recs_filesize/DataPageSize;
 		int ptrs_blocks = ptrs_filesize/DataPageSize;
 		
 		// search in for key pointers file
@@ -214,51 +204,55 @@ public class B_tropos {
 	}
 
 	public void createSortedFile_B(String filename) throws IOException {
+		// TODO make it write to blocks [1:] so block 0 is reserved for FileHandle info, and add FileHandle info before exiting
+		
+		// initialize variables, instantiate classes and open files
 		FileManager src_sys = new FileManager();
 		FileManager dst_sys = new FileManager();
-		// TODO make it write to blocks [1:] so block 0 is reserved for FileHandle info, and add FileHandle info before exiting
- 
 		String index_filename = filename + "_ptrs";
 		String sorted_filename = index_filename + "_sorted";
-		dst_sys.CreateFile(sorted_filename);
 		dst_sys.OpenFile(sorted_filename);
 		src_sys.OpenFile(index_filename);
-		
 		ArrayList<Integer> unsortedkeys = new ArrayList<Integer>();
 		ArrayList<Record> records = new ArrayList<Record>();
-		
 		int filesize = (int) src_sys.file.length();
 		int blocks = filesize/DataPageSize;
-		int key, block_ptr, counter = 0, block_num=0;
+		int key, block_ptr, counter = 0, block_number=0, total_disk_accesses=0;
 		
+		// read key-pointer pairs from the index file and store them in an ArrayList
 		for(int i=0; i<blocks; i++) {
 			src_sys.ReadBlock(i);
-			for(int j=0; j<4; j++) {
-				key = Functions_misc.readInt(src_sys.buffer, j*record_size);
+			total_disk_accesses++;
+			for(int j=0; j<DataPageSize/8; j++) {
+				key = Functions_misc.readInt(src_sys.buffer, j*8); //TODO there was an error here that took me 3 hours because the record size isnt record_size for the ptrs file, but 8 FFSKMS DELETETHIS
 				unsortedkeys.add(key);
-				block_ptr = Functions_misc.readInt(src_sys.buffer, j*record_size+4);
+				block_ptr = Functions_misc.readInt(src_sys.buffer, j*8+4);
 				Record rec = new Record(key, block_ptr);
 				records.add(rec);
 			}
 		}
 		
+		// sort the records ArrayList
 		ArrayList<Record> sorted_recs = Functions_misc.sortRecordsB(records);
 		
+		// write the sorted key-pointer pairs to the new file
 		for(int i=0; i<sorted_recs.size(); i++) {
 			block_ptr = sorted_recs.get(i).getBlock_ptr();
 			key = sorted_recs.get(i).getKey();
+			
 			dst_sys.writeIntToBuffer(key, 8*counter);
-			dst_sys.writeIntToBuffer(block_ptr, (8*counter)+4);
+			dst_sys.writeIntToBuffer(block_ptr, counter*8+4);
 	    	
-	    	if(counter==(DataPageSize/8)-1) {
-		    	dst_sys.WriteBlock(block_num);
-	    		block_num++;
+	    	
+	    	if(counter==DataPageSize/8-1) {
+	    		dst_sys.WriteBlock(block_number);
+	    		block_number++;
+	    		total_disk_accesses++;
 		    	counter=0;
 	    	}else {
 	    		counter++;
 	    	}		
 	    }
-		
-	}
-	
+		System.out.println("Sorted index file created with " + total_disk_accesses + " total disk accesses. (" + (total_disk_accesses-block_number) + " reads and " + block_number + " writes)");
+	}	
 }

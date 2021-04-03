@@ -53,7 +53,7 @@ public class BinarySearch {
             // If the element is present at the 
             // middle itself 
             if (data[mid] == key) 
-                return mid; 
+                return data[mid]; 
   
             // If element is smaller than mid, then 
             // it can only be present in left subarray 
@@ -69,6 +69,6 @@ public class BinarySearch {
         // We return Integer.MIN_VALUE in this case, so the data array can not contain this value!
         // TODO add this in porject essay
         // this is changed to return -1 if failed
-        return -1; 
+        return Integer.MIN_VALUE; 
     } 
 }
