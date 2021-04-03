@@ -170,4 +170,21 @@ public class A_tropos {
 		System.out.println("Sorted records file created with " + (disk_reads+disk_writes) + " disk accesses. (" + disk_reads +" reads and " + disk_writes + " writes)");
 	}
 	
+	public int[] readKeysFromFile(String filename) throws IOException{
+		ArrayList<Integer> keys = new ArrayList<Integer>();
+		sys.OpenFile(filename);
+		int filesize = (int) sys.file.length();
+		int blocks = filesize/DataPageSize;
+		for(int i=0; i<blocks; i++) {
+			sys.ReadBlock(i);				// read one block
+			for(int j=0; j<4; j++) {		// iterate over the records of the block
+				keys.add(Functions_misc.readInt(sys.buffer, j*record_size));
+			}
+		}
+		int[] used_keys = new int[keys.size()];
+		for(int i=0; i<keys.size(); i++) {
+			used_keys[i] = (int) keys.get(i);
+		}
+		return used_keys;
+	}
 }

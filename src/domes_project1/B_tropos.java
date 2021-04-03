@@ -255,4 +255,22 @@ public class B_tropos {
 	    }
 		System.out.println("Sorted index file created with " + total_disk_accesses + " total disk accesses. (" + (total_disk_accesses-block_number) + " reads and " + block_number + " writes)");
 	}	
+
+	public int[] readKeysFromFile(String filename) throws IOException{
+		ArrayList<Integer> keys = new ArrayList<Integer>();
+		sys_ptrs.OpenFile(filename);
+		int filesize = (int) sys_ptrs.file.length();
+		int blocks = filesize/DataPageSize;
+		for(int i=0; i<blocks; i++) {
+			sys_ptrs.ReadBlock(i);			// read one block
+			for(int j=0; j<DataPageSize/8; j++) {		// iterate over the records of the block
+				keys.add(Functions_misc.readInt(sys_ptrs.buffer, j*8));
+			}
+		}
+		int[] used_keys = new int[keys.size()];
+		for(int i=0; i<keys.size(); i++) {
+			used_keys[i] = (int) keys.get(i);
+		}
+		return used_keys;
+	}
 }

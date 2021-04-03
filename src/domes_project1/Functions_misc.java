@@ -40,7 +40,7 @@ public class Functions_misc {
 	 
 	static int getRandomNum(int max, Random rng) {
 		// generate a random number
-	    int random = rng.nextInt(1000000);
+	    int random = rng.nextInt(max);
 	    return random;
 	}
 	 
